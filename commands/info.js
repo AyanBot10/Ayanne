@@ -8,8 +8,8 @@ module.exports = {
     const chatId = msg.chat.id;
 
     // Developer and bot information
-    const developerName = 'Your Developer Name';
-    const botName = 'Your Bot Name';
+    const developerName = '1dev-hridoy';
+    const botName = 'Nexalo';
     const description = `*🤖 Bot Information:*\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
       `*Bot Name:* ${botName}\n` +
@@ -17,7 +17,7 @@ module.exports = {
       `*Description:* A multifunctional bot with a range of utilities and features.\n\n` +
       '*🌐 Developer Links:*\n' +
       '━━━━━━━━━━━━━━━━━━━━━\n' +
-      `[GitHub](https://github.com/yourgithub) | [YouTube](https://youtube.com/yourchannel) | [Instagram](https://instagram.com/yourinstagram) | [Facebook](https://facebook.com/yourfacebook)\n\n`;
+      `[GitHub](https://github.com/1dev-hridoy) | [YouTube](https://youtube.com/hridoycode) | [Instagram](https://instagram.com/hridoy.py) | [Facebook](https://facebook.com/hridoy.py)\n\n`;
 
     // Bot status details
     const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
@@ -44,12 +44,12 @@ module.exports = {
       const buttons = {
         inline_keyboard: [
           [
-            { text: 'GitHub', url: 'https://github.com/yourgithub' },
-            { text: 'YouTube', url: 'https://youtube.com/yourchannel' },
+            { text: 'GitHub', url: 'https://github.com/1dev-hridoy' },
+            { text: 'YouTube', url: 'https://youtube.com/hridoycode' },
           ],
           [
-            { text: 'Instagram', url: 'https://instagram.com/yourinstagram' },
-            { text: 'Facebook', url: 'https://facebook.com/yourfacebook' },
+            { text: 'Instagram', url: 'https://instagram.com/hridoy.py' },
+            { text: 'Facebook', url: 'https://facebook.com/hridoy.py' },
           ],
         ],
       };
