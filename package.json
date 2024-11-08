@@ -1,14 +1,32 @@
 {
-  "name": "yuki",
+  "name": "nexalo",
   "version": "1.0.0",
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "telegram-bot",
+    "nodejs",
+    "javascript",
+    "chatbot",
+    "moderation",
+    "mongodb",
+    "automation",
+    "utilities",
+    "music-bot",
+    "fun-commands",
+    "bot-commands",
+    "community-support",
+    "open-source",
+    "api-integration",
+    "ffmpeg",
+    "translate",
+    "youtube-download"
+  ],
+  "author": "HridoyCode",
+  "license": "MIT",
+  "description": "Nexalo - A feature-rich Telegram bot built with Node.js offering advanced group moderation, music downloads, utility functions, and MongoDB integration for data persistence.",
   "dependencies": {
     "@google-cloud/translate": "^8.5.0",
     "axios": "^1.7.7",
