@@ -24,7 +24,7 @@ module.exports = {
     const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
     const freeRam = (os.freemem() / 1024 / 1024).toFixed(2);
     const cpuUsage = os.loadavg()[0].toFixed(2);
-
+ 
     let storageInfo = 'N/A';
     exec('df -h /', (error, stdout) => {
       if (!error) {
