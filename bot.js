@@ -183,6 +183,27 @@ async function startBot() {
     }
   });
 
+  bot.on('callback_query', async (callbackQuery) => {
+    try {
+      const [commandName, ...args] = callbackQuery.data.split(':');
+      const command = commands[commandName];
+
+      if (command && command.handleCallback) {
+        console.log(rainbowText(
+          `[${new Date().toLocaleTimeString()}] CALLBACK - ${callbackQuery.from.username || callbackQuery.from.first_name}: ${callbackQuery.data}`
+        ));
+        
+        await command.handleCallback(bot, callbackQuery, args, db);
+      }
+    } catch (error) {
+      console.error(chalk.red('Error handling callback query:'), error);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '💔 Oopsie woopsie! Something went wrong! 💔',
+        show_alert: true
+      }).catch(err => console.error('Error sending callback error message:', err));
+    }
+  });
+
   bot.on('new_chat_members', async (msg) => {
     const chatId = msg.chat.id;
     const groupName = msg.chat.title;
@@ -249,6 +270,4 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (error) => {
   console.error(chalk.red.bold(fancyBox('🚨 Uncaught Exception: 🚨')));
   console.error(error);
-  // Optionally, you can choose to exit the process here
-  // process.exit(1);
 });
