@@ -6,9 +6,11 @@ const chalk = require('chalk');
 const { connectToDatabase } = require('./db');
 const schedule = require('node-schedule');
 const { updateUserXP } = require('./commands/rank');
+const fetch = require('node-fetch');
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
+// Load commands
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
@@ -21,6 +23,18 @@ for (const file of commandFiles) {
 
 bot.commands = commands;
 
+// Load event handlers
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+const events = {};
+
+for (const file of eventFiles) {
+  const event = require(path.join(eventsPath, file));
+  events[event.name] = event;
+}
+
+// Utility functions
 function rainbowText(text) {
   const colors = ['red', 'magenta', 'blue', 'cyan', 'green', 'yellow'];
   return text.split('').map((char, i) => {
@@ -208,10 +222,23 @@ async function startBot() {
     const chatId = msg.chat.id;
     const groupName = msg.chat.title;
     const memberCount = await bot.getChatMemberCount(chatId);
-
+  
     for (const newMember of msg.new_chat_members) {
-      await welcome.execute(bot, newMember, groupName, memberCount)
-        .catch(error => console.error('Error executing welcome:', error));
+      if (events.welcome) {
+        await events.welcome.execute(bot, msg, groupName, memberCount)
+          .catch(error => console.error('Error executing welcome:', error));
+      }
+    }
+  });
+
+  bot.on('left_chat_member', async (msg) => {
+    const chatId = msg.chat.id;
+    const groupName = msg.chat.title;
+    const memberCount = await bot.getChatMemberCount(chatId);
+  
+    if (events.goodbye) {
+      await events.goodbye.execute(bot, msg, groupName, memberCount)
+        .catch(error => console.error('Error executing goodbye:', error));
     }
   });
 
@@ -220,8 +247,10 @@ async function startBot() {
     const groupName = msg.chat.title;
     const memberCount = await bot.getChatMemberCount(chatId);
 
-    await goodbye.execute(bot, msg.left_chat_member, groupName, memberCount)
-      .catch(error => console.error('Error executing goodbye:', error));
+    if (events.goodbye) {
+      await events.goodbye.execute(bot, msg.left_chat_member, groupName, memberCount)
+        .catch(error => console.error('Error executing goodbye:', error));
+    }
   });
 
   bot.on('left_chat_participant', async (msg) => {

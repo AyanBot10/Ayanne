@@ -5,87 +5,92 @@ module.exports = {
   adminOnly: false,
   ownerOnly: false,
   category: 'Utility',
-  description: 'Show all commands or info about a specific command',
-  guide: 'Use /help for all commands, /help <category> for category commands, or /help <command> for specific info',
-  execute: async (bot, msg, args, db) => {
+  description: 'Show all available commands',
+  guide: 'Use /help to see all commands',
+  execute: async (bot, msg) => {
     const chatId = msg.chat.id;
     const commands = bot.commands;
 
     if (!commands) {
-      return bot.sendMessage(chatId, 'Error: Commands not properly loaded. Please contact the bot administrator.');
+      return bot.sendMessage(chatId, 'Error: Commands not available. Please try again later.');
     }
 
-    if (args.length === 0) {
-      // Show all categories
-      let helpMessage = '*Command Categories:*\n\n';
-      const categories = new Set();
-      
-      // Safely collect categories
-      Object.values(commands).forEach(cmd => {
-        if (cmd && cmd.category) {
-          categories.add(cmd.category);
+    const createCommandList = (cmds) => {
+      const categories = {};
+      Object.entries(cmds).forEach(([name, cmd]) => {
+        if (!categories[cmd.category]) {
+          categories[cmd.category] = [];
         }
+        categories[cmd.category].push(name);
       });
-      
-      if (categories.size === 0) {
-        categories.add('Uncategorized');
+
+      let commandList = '';
+      for (const [category, cmds] of Object.entries(categories)) {
+        commandList += `╭───✿ ${category}\n`;
+        for (let i = 0; i < cmds.length; i += 2) {
+          commandList += `│♡${cmds[i]}${cmds[i+1] ? ` ♡${cmds[i+1]}` : ''}\n`;
+        }
+        commandList += `╰───────────✿\n`;
       }
+      return commandList;
+    };
 
-      categories.forEach(category => {
-        helpMessage += `/${category.toLowerCase()} - ${category} commands\n`;
-      });
+    const getBotInfo = async () => {
+      try {
+        const botInfo = await bot.getMe();
+        const ownerId = process.env.OWNER_ID;
+        let ownerName = 'Unknown';
 
-      helpMessage += '\nUse /help <category> to see commands in a specific category.';
-      helpMessage += '\nUse /help <command> for more information on a specific command.';
-      helpMessage += `\n\nTotal commands: ${Object.keys(commands).length}`;
-
-      await bot.sendMessage(chatId, helpMessage, { parse_mode: 'Markdown' });
-    } else {
-      const searchTerm = args[0].toLowerCase();
-      const categoryCommands = Object.entries(commands).filter(([_, cmd]) => 
-        cmd && cmd.category && cmd.category.toLowerCase() === searchTerm
-      );
-
-      if (categoryCommands.length > 0) {
-        // Show commands for a specific category
-        let helpMessage = `*${searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1)} Commands:*\n\n`;
-        
-        categoryCommands.forEach(([name, command]) => {
-          helpMessage += `/${name} - ${command.description || 'No description available'}\n`;
-        });
-
-        helpMessage += '\nUse /help <command> for more information on a specific command.';
-        helpMessage += `\n\nTotal ${searchTerm} commands: ${categoryCommands.length}`;
-        helpMessage += `\nTotal commands: ${Object.keys(commands).length}`;
-
-        await bot.sendMessage(chatId, helpMessage, { parse_mode: 'Markdown' });
-      } else {
-        // Show info for a specific command
-        const command = commands[searchTerm];
-
-        if (command) {
-          const helpMessage = `*/${searchTerm}*\n\n` +
-                            `Description: ${command.description || 'No description available'}\n` +
-                            `Category: ${command.category || 'Uncategorized'}\n` +
-                            `Usage: ${command.guide || 'No usage guide available'}\n` +
-                            `Admin Only: ${command.adminOnly ? 'Yes' : 'No'}\n` +
-                            `Owner Only: ${command.ownerOnly ? 'Yes' : 'No'}\n\n` +
-                            `Total commands: ${Object.keys(commands).length}`;
-
-          await bot.sendMessage(chatId, helpMessage, { parse_mode: 'Markdown' });
-        } else {
-          const similarCommands = Object.keys(commands).filter(cmd => cmd.includes(searchTerm));
-          let errorMessage = `Command /${searchTerm} not found. Use /help to see all available categories.`;
-          
-          if (similarCommands.length > 0) {
-            errorMessage += '\n\nDid you mean:\n' + similarCommands.map(cmd => `/${cmd}`).join('\n');
+        if (ownerId) {
+          try {
+            const chatMember = await bot.getChatMember(ownerId, ownerId);
+            ownerName = chatMember.user.first_name || 'Unknown';
+          } catch (error) {
+            console.error('Error fetching owner info:', error);
           }
-
-          errorMessage += `\n\nTotal commands: ${Object.keys(commands).length}`;
-
-          await bot.sendMessage(chatId, errorMessage);
         }
+
+        return `Nexalo ♡\nMy sensei\n${ownerName}\nfb.com/hridoy.py`;
+      } catch (error) {
+        console.error('Error fetching bot info:', error);
+        return 'Unable to fetch bot and owner information.';
       }
+    };
+
+    try {
+      const commandList = createCommandList(commands);
+      const botInfo = await getBotInfo();
+      const totalCommands = Object.keys(commands).length;
+
+      const finalMessage = `${commandList}
+╭───✿ SUPPORT GC
+│If you don't know how to
+│use Nexalo or face any
+│problem then please join
+│Nino ♡ Nexalo Support gc by click the below button 
+├──────────✿
+├─────✿
+│» Total Cmds ${totalCommands} cmds.
+│» Type /help <cmd> to learn
+│how to use the command.
+├─────✿
+│ ${botInfo}
+╰─────────────✿`;
+
+      const keyboard = {
+        inline_keyboard: [
+          [{ text: 'Join Support Group', url: 'https://t.me/example_support_group' }]
+        ]
+      };
+
+      await bot.sendMessage(chatId, finalMessage, { 
+        parse_mode: 'Markdown',
+        reply_markup: JSON.stringify(keyboard)
+      });
+    } catch (error) {
+      console.error('Error in help command:', error);
+      await bot.sendMessage(chatId, 'An error occurred while fetching the help information. Please try again later.');
     }
   }
 };
+
